@@ -25,8 +25,22 @@ import static com.sun.codemodel.JMod.PRIVATE;
 import static com.sun.codemodel.JMod.PUBLIC;
 import static com.sun.codemodel.JMod.STATIC;
 
-import javax.lang.model.element.TypeElement;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
+
+import org.androidannotations.annotations.Bean;
+import org.androidannotations.annotations.OnCreate;
+import org.androidannotations.annotations.OnDestroy;
+import org.androidannotations.annotations.OnStart;
+import org.androidannotations.annotations.OnStop;
 import org.androidannotations.helper.ActionBarSherlockHelper;
 import org.androidannotations.helper.AnnotationHelper;
 import org.androidannotations.helper.HoloEverywhereHelper;
@@ -63,12 +77,74 @@ public class EFragmentHolder extends EComponentWithViewSupportHolder implements 
 	private JBlock onOptionsItemSelectedIfElseBlock;
 
 	public EFragmentHolder(ProcessHolder processHolder, TypeElement annotatedElement) throws Exception {
+
 		super(processHolder, annotatedElement);
 		instanceStateHolder = new InstanceStateHolder(this);
 		onActivityResultHolder = new OnActivityResultHolder(this);
 		createOnCreate();
 		createOnViewCreated();
 		createFragmentBuilder();
+		// CARL
+		createSimpleBody("onDestroy", OnDestroy.class);
+		createSimpleBody("onStart", OnStart.class);
+		createSimpleBody("onStop", OnStop.class);
+
+		// System.out.println("CARL");
+		// String className = annotatedElement.asType().toString();
+
+	}
+
+	ExecutableElement getMethodFor(Element clazz, Class annotation) {
+		List<? extends Element> methods = clazz.getEnclosedElements();
+		for (Element method : methods) {
+			if (method instanceof ExecutableElement) {
+				Annotation a = method.getAnnotation(annotation);
+				if (a != null) {
+
+					return (ExecutableElement) method;
+				}
+			}
+		}
+		return null;
+	}
+
+	List<VariableElement> getMembersFor(Element clazz, Class annotation) {
+		List<VariableElement> result = new ArrayList<VariableElement>();
+		List<? extends Element> elements = clazz.getEnclosedElements();
+		for (Element element : elements) {
+			if (element instanceof VariableElement) {
+				Annotation a = element.getAnnotation(annotation);
+				if (a != null) {
+
+					result.add((VariableElement) element);
+				}
+			}
+		}
+		return result;
+	}
+
+	List<VariableElement> getMembersFor(Element clazz, Class annotation, Class mustHaveAnnotation) {
+		List<VariableElement> result = new ArrayList<VariableElement>();
+		List<? extends Element> elements = clazz.getEnclosedElements();
+		for (Element element : elements) {
+			if (element instanceof VariableElement) {
+				Annotation a = element.getAnnotation(annotation);
+				if (a != null) {
+
+					VariableElement bean = (VariableElement) element;
+
+					TypeMirror t = bean.asType();
+					if (t instanceof DeclaredType) {
+						DeclaredType d = (DeclaredType) t;
+						ExecutableElement method = getMethodFor(d.asElement(), mustHaveAnnotation);
+						if (method != null) {
+							result.add(bean);
+						}
+					}
+				}
+			}
+		}
+		return result;
 	}
 
 	private void createOnCreate() {
@@ -81,7 +157,77 @@ public class EFragmentHolder extends EComponentWithViewSupportHolder implements 
 		createFindViewById();
 		onCreateBody.invoke(getInit()).arg(onCreateSavedInstanceState);
 		onCreateBody.invoke(_super(), onCreate).arg(onCreateSavedInstanceState);
+
+		// CARL
+		List<VariableElement> beans = getMembersFor(annotatedElement, Bean.class);
+		for (VariableElement bean : beans) {
+			callMethodFor(onCreateBody, bean, OnCreate.class);
+		}
 		viewNotifierHelper.resetPreviousNotifier(onCreateBody, previousNotifier);
+	}
+
+	private void createSimpleBody(String methodName, Class<?> annotation) {
+		List<VariableElement> beans = getMembersFor(annotatedElement, Bean.class, annotation);
+		if (!beans.isEmpty()) {
+
+			JMethod method = generatedClass.method(PUBLIC, codeModel().VOID, methodName);
+			method.annotate(Override.class);
+			JBlock onDestroyBody = method.body();
+
+			for (VariableElement bean : beans) {
+				callMethodFor(onDestroyBody, bean, annotation);
+			}
+
+			onDestroyBody.invoke(_super(), method);
+		}
+	}
+
+	TypeElement getType(Element element) {
+		if (element != null) {
+			if (element.asType() instanceof DeclaredType) {
+				return (TypeElement) ((DeclaredType) element.asType()).asElement();
+			}
+		}
+		return null;
+	}
+
+	/*
+	 * Handles the method parameters - no parameters - a context - a fragment
+	 */
+	private void callMethodFor(JBlock onCreateBody, VariableElement bean, Class<?> annotation) {
+		if (bean != null) {
+			String beanName = bean + "";
+			TypeElement d = getType(bean);
+			// TypeMirror t = bean.asType();
+			if (d != null) {
+				// DeclaredType d = (DeclaredType) t;
+				ExecutableElement method = getMethodFor(d, annotation);
+				if (method != null) {
+					String methodName = method.getSimpleName().toString();
+					// Without parameter
+					if (method.getParameters().isEmpty()) {
+						onCreateBody.invoke(JExpr.ref(beanName), methodName);
+					} else if (method.getParameters().size() == 1) {
+						VariableElement param = method.getParameters().get(0);
+						d = getType(param);
+						if (d != null) {
+							AnnotationHelper annotationHelper = new AnnotationHelper(processingEnvironment());
+							// If the parameter is a fragment, pass this
+							if (annotationHelper.getTypeUtils().isAssignable(annotatedElement.asType(), param.asType())) {
+								onCreateBody.invoke(JExpr.ref(beanName), methodName).arg(JExpr._this());
+							}
+							// If the parameter is a contex, pass the activity
+							if ("android.content.Context".equals(d.getQualifiedName().toString())) {
+								onCreateBody.invoke(JExpr.ref(beanName), methodName).arg(JExpr.ref("getActivity()"));
+							}
+
+						}
+
+					}
+				}
+			}
+		}
+
 	}
 
 	private void createOnViewCreated() {
