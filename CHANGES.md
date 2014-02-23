@@ -38,7 +38,9 @@ public class MainFragment extends Fragment {
 	
 	DirectBean directBean ; 
 }
+
 ``
+
 Beans
 
 ````java
@@ -93,8 +95,11 @@ public class Abean {
 		
 	}
 }
+
 ``
+
 Generated
+
 ```` java
 public final class MainFragment_ ...
 {
@@ -122,4 +127,5 @@ public final class MainFragment_ ...
         super.onDestroy();
     }
 }
+
 ``
