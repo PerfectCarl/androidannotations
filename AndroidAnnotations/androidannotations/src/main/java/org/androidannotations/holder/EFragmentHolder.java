@@ -84,16 +84,14 @@ public class EFragmentHolder extends EComponentWithViewSupportHolder implements 
 		createOnCreate();
 		createOnViewCreated();
 		createFragmentBuilder();
-		// CARL
+
 		createSimpleBody("onDestroy", OnDestroy.class);
 		createSimpleBody("onStart", OnStart.class);
 		createSimpleBody("onStop", OnStop.class);
 
-		// System.out.println("CARL");
-		// String className = annotatedElement.asType().toString();
-
 	}
 
+	@SuppressWarnings("rawtypes")
 	ExecutableElement getMethodFor(Element clazz, Class annotation) {
 		List<? extends Element> methods = clazz.getEnclosedElements();
 		for (Element method : methods) {
@@ -108,6 +106,7 @@ public class EFragmentHolder extends EComponentWithViewSupportHolder implements 
 		return null;
 	}
 
+	@SuppressWarnings("rawtypes")
 	List<VariableElement> getMembersFor(Element clazz, Class annotation) {
 		List<VariableElement> result = new ArrayList<VariableElement>();
 		List<? extends Element> elements = clazz.getEnclosedElements();
@@ -123,6 +122,7 @@ public class EFragmentHolder extends EComponentWithViewSupportHolder implements 
 		return result;
 	}
 
+	@SuppressWarnings("rawtypes")
 	List<VariableElement> getMembersFor(Element clazz, Class annotation, Class mustHaveAnnotation) {
 		List<VariableElement> result = new ArrayList<VariableElement>();
 		List<? extends Element> elements = clazz.getEnclosedElements();
