@@ -39,7 +39,7 @@ public class MainFragment extends Fragment {
 	DirectBean directBean ; 
 }
 
-``
+````
 
 Beans
 
