@@ -12,9 +12,8 @@ See [issue #843] (https://github.com/excilys/androidannotations/issues/843) for 
   - handle bundle savedBeanInstance
   - implementing onPause, onResume
   - emit warning if method signatures are not the expected one
-  - fix warning about rootContext not used. Is it mu changes?
+  - fix warning about rootContext not used. Are those due to my changes?
 ````
-
 The value of the field ACompleteBean_.context_ is not used	ACompleteBean_.java	/test-AA-2/.apt_generated/com/example/test_aa_2/beans	line 14
 The value of the field AHalfbean_.context_ is not used	AHalfbean_.java	/test-AA-2/.apt_generated/com/example/test_aa_2/beans	line 14	
 The value of the field Abean_.context_ is not used	Abean_.java	/test-AA-2/.apt_generated/com/example/test_aa_2/beans	line 14
