@@ -2,15 +2,16 @@
 See [issue #843] (https://github.com/excilys/androidannotations/issues/843) for more information.
 
 #Status
-  - Fragment: working (waiting preliminary review)
+  - Fragment: working (waiting preliminary review).
   - Activity: not implemented
   - Service: not implemented
 
 #Fragments
 
 ##TODO
-  - handle savedBeanInstance
-  - emit warning if method signatures are not the one expected
+  - handle bundle savedBeanInstance
+  - implementing onPause, onResume
+  - emit warning if method signatures are not the expected one
   - fix warning about rootContext not used?
 
 ##Sample
