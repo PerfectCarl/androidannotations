@@ -2,17 +2,18 @@
 See [issue #843] (https://github.com/excilys/androidannotations/issues/843) for more information.
 
 #Status
-  - Fragment: working (waiting preliminary review).
+  - Fragment: working.
   - Activity: not implemented
   - Service: not implemented
 
 #Fragments
 
 ##TODO
+  - review the code. **question** Can anyone have a look?
   - handle bundle savedBeanInstance
   - implementing onPause, onResume
-  - emit warning if method signatures are not the expected one
-  - fix warning about rootContext not used. Are those due to my changes?
+  - emit warning if method signatures are not the expected one. **question** how to emit compilation errors/warnings? 
+  - fix warning about rootContext not used. **question** Can someone confirm that those are due to my changes? 
 ````
 The value of the field ACompleteBean_.context_ is not used	ACompleteBean_.java	/test-AA-2/.apt_generated/com/example/test_aa_2/beans	line 14
 The value of the field AHalfbean_.context_ is not used	AHalfbean_.java	/test-AA-2/.apt_generated/com/example/test_aa_2/beans	line 14	
