@@ -96,7 +96,7 @@ public class Abean {
 	}
 }
 
-``
+````
 
 Generated
 
@@ -128,4 +128,4 @@ public final class MainFragment_ ...
     }
 }
 
-``
+````
